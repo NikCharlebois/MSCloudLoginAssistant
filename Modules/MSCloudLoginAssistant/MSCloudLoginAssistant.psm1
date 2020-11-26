@@ -236,7 +236,7 @@ function Get-AzureADDLL
     [OutputType([System.String])]
     param(
     )
-    [array]$AzureADModules = Get-Module -ListAvailable | Where-Object { $_.name -eq "AzureADPreview"}
+    [array]$AzureADModules = Get-Module -ListAvailable | Where-Object { $_.name -eq "AzureADPreview" }
 
     if ($AzureADModules.count -eq 0)
     {
@@ -449,7 +449,7 @@ function Get-AccessToken
                     return $null
                 }
             } -ArgumentList @($targetUri, $AuthUri, $ClientId, $Credentials, $AzureADDLL) | Out-Null
-            $job = Get-Job | Where-Object -FilterScript {$_.Name -eq $jobName}
+            $job = Get-Job | Where-Object -FilterScript { $_.Name -eq $jobName }
             do
             {
                 Start-Sleep -Seconds 1
@@ -587,8 +587,8 @@ function Get-CloudEnvironmentInfo
         else
         {
             $tenantName = Get-MSCloudLoginOrganizationName -ApplicationId $ApplicationId `
-               -TenantId $TenantId `
-               -CertificateThumbprint $CertificateThumbprint
+                -TenantId $TenantId `
+                -CertificateThumbprint $CertificateThumbprint
         }
         $response = Invoke-WebRequest -Uri "https://login.microsoftonline.com/$tenantName/v2.0/.well-known/openid-configuration" -Method Get
 
@@ -618,13 +618,16 @@ function Get-TenantDomain
         $CertificateThumbprint
     )
 
-    Test-MSCloudLogin -Platform AzureAD -ApplicationId $ApplicationId -TenantId $TenantId -CertificateThumbprint $CertificateThumbprint
+    Test-MSCloudLogin -Platform 'MicrosoftGraph' `
+        -ApplicationId $ApplicationId `
+        -TenantId $TenantId `
+        -CertificateThumbprint $CertificateThumbprint
 
-    $domain = Get-AzureADDomain  | where-object {$_.IsInitial -eq $True} | select Name
+    $domain = Get-MgDomain  | where-object { $_.IsInitial -eq $True } | Select-Object Id
 
-    if ($null -ne $domain){
-
-        return $domain.Name.split(".")[0]
+    if ($null -ne $domain)
+    {
+        return $domain.Id.split(".")[0]
     }
 }
 
@@ -644,13 +647,17 @@ function Get-MSCloudLoginOrganizationName
         $CertificateThumbprint
     )
 
-    Test-MSCloudLogin -Platform AzureAD -ApplicationId $ApplicationId -TenantId $TenantId -CertificateThumbprint $CertificateThumbprint
+    Test-MSCloudLogin -Platform 'MicrosoftGraph' `
+        -ApplicationId $ApplicationId `
+        -TenantId $TenantId `
+        -CertificateThumbprint $CertificateThumbprint
 
-    $domain = Get-AzureADDomain  | where-object {$_.IsInitial -eq $True} | select Name
+    $domain = Get-MgDomain  | where-object { $_.IsInitial -eq $True } | Select-Object Id
 
-    if ($null -ne $domain){
+    if ($null -ne $domain)
+    {
 
-        return $domain.Name
+        return $domain.Id
     }
 }
 
